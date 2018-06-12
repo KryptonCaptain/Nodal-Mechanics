@@ -12,8 +12,7 @@ import thaumcraft.api.research.ResearchPage;
 
 public class NodalResearch
 {
-    public static ResearchItem researchNodeCatalyzation;
-
+    private static ResearchItem researchNodeCatalyzation;
     public static void initResearch()
     {
         researchNodeCatalyzation = new ResearchItem("NODECATALYZATION", "BASICS", new AspectList().add(Aspect.AURA, 6).add(Aspect.VOID, 3), -5, 4, 3, new ItemStack(NodalItems.itemMatrix))

@@ -11,20 +11,23 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import org.apache.commons.lang3.text.WordUtils;
 import shukaro.nodalmechanics.NodalMechanics;
 import shukaro.nodalmechanics.util.FormatCodes;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 
 import java.util.List;
 import java.util.Locale;
 
-public class ItemMatrix extends Item
+public class ItemMatrix
+    extends Item
 {
+    @SideOnly(Side.CLIENT)
     private IIcon icon;
-
     public ItemMatrix()
     {
         super();
@@ -32,84 +35,83 @@ public class ItemMatrix extends Item
         this.setCreativeTab(NodalMechanics.mainTab);
         this.setUnlocalizedName("nodalmechanics.matrix");
     }
-
     @Override
     public String getUnlocalizedName(ItemStack stack)
     {
         if (stack.hasTagCompound())
-            return this.getUnlocalizedName() + ".attuned";
-        else
-            return this.getUnlocalizedName() + ".unattuned";
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item id, CreativeTabs tab, List list)
-    {
-        list.add(new ItemStack(id, 1, 0));
-        for (Aspect aspect : Aspect.getPrimalAspects())
         {
-            ItemStack stack = new ItemStack(id, 1, 0);
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString("aspects", multiplyAspect(aspect.getTag()));
-            stack.setTagCompound(tag);
-            list.add(stack);
+            return this.getUnlocalizedName() + ".attuned";
+        }
+        else
+        {
+            return this.getUnlocalizedName() + ".unattuned";
         }
     }
-
-    private String multiplyAspect(String aspect)
+    @Override
+    @SideOnly(Side.CLIENT)
+    @SuppressWarnings("unchecked")
+    public void getSubItems(Item item, CreativeTabs creativeTab, List list)
     {
-        return aspect + "," + aspect + "," + aspect + "," + aspect + "," + aspect + "," + aspect + "," + aspect + "," + aspect;
+        list.add(new ItemStack(item, 1, 0));
+        for (Aspect aspect : Aspect.getPrimalAspects())
+        {
+            ItemStack itemStack = new ItemStack(item, 1, 0);
+            AspectList aspectList = new AspectList().add(aspect, 8);
+            NBTTagCompound tagCompound = new NBTTagCompound();
+            aspectList.writeToNBT(tagCompound);
+            itemStack.setTagCompound(tagCompound);
+            list.add(itemStack);
+        }
     }
-
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIconFromDamage(int meta)
     {
         return this.icon;
     }
-
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister reg)
+    public void registerIcons(IIconRegister iconRegister)
     {
-        this.icon = reg.registerIcon(NodalMechanics.modID.toLowerCase(Locale.ENGLISH) + ":" + "itemMatrix");
+        this.icon = iconRegister.registerIcon(NodalMechanics.modID.toLowerCase(Locale.ENGLISH) + ":" + "itemMatrix");
     }
-
     @Override
     @SideOnly(Side.CLIENT)
-    public EnumRarity getRarity(ItemStack stack)
+    public EnumRarity getRarity(ItemStack itemStack)
     {
-        return stack.hasTagCompound() ? EnumRarity.uncommon : EnumRarity.common;
+        return itemStack.hasTagCompound() ? EnumRarity.uncommon : EnumRarity.common;
     }
-
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean hasEffect(ItemStack stack, int pass)
+    public boolean hasEffect(ItemStack itemStack, int pass)
     {
-        return stack.hasTagCompound();
+        return itemStack.hasTagCompound();
     }
-
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer player, List infoList, boolean advancedTooltips)
+    @SuppressWarnings("unchecked")
+    public void addInformation(ItemStack itemStack, EntityPlayer player, List list, boolean advancedTooltips)
     {
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("aspects"))
+        if (itemStack.hasTagCompound())
         {
-            TMap<String, Integer> aspectMap = new THashMap<String, Integer>();
-            for (String s : stack.getTagCompound().getString("aspects").split(","))
+            NBTTagCompound tagCompound = itemStack.getTagCompound();
+            AspectList aspectList = new AspectList();
+            aspectList.readFromNBT(tagCompound);
+            for (Aspect aspect : aspectList.getAspects())
             {
-                if (!aspectMap.containsKey(s))
-                    aspectMap.put(s, 1);
-                else
-                    aspectMap.put(s, aspectMap.get(s) + 1);
+                list.add("\u00A7" + (aspect.getChatcolor() != null ? aspect.getChatcolor() : "7") +
+                         WordUtils.capitalize(aspect.getName()) + FormatCodes.Reset.code + FormatCodes.White.code +
+                         " x " + aspectList.getAmount(aspect));
             }
-            for (String s : aspectMap.keySet())
-                infoList.add("\u00A7" + (Aspect.getAspect(s).getChatcolor() != null ? Aspect.getAspect(s).getChatcolor() : "7") + WordUtils.capitalize(s) + FormatCodes.Reset.code + FormatCodes.White.code + " x " + aspectMap.get(s));
-
-            infoList.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code + StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.attuned"));
+            list.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code +
+                     StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.attuned"));
         }
         else
-            infoList.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code + StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.unattuned"));
+        {
+            list.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code +
+                     StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.unattuned"));
+        }
+        list.add(FormatCodes.Grey.code + FormatCodes.Italic.code +
+                 StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.recipe"));
     }
 }

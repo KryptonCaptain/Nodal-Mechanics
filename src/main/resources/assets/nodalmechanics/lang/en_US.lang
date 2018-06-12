@@ -4,6 +4,7 @@ item.nodalmechanics.matrix.attuned.name=Attuned Node Matrix
 item.nodalmechanics.matrix.unattuned.name=Unattuned Node Matrix
 tooltip.nodalmechanics.matrix.attuned=Faintly humming...
 tooltip.nodalmechanics.matrix.unattuned=Empty
+tooltip.nodalmechanics.matrix.recipe=You can attune it multiple times!
 
 tc.research_name.NODECATALYZATION=Node Catalyzation
 tc.research_text.NODECATALYZATION=From nothing... Something

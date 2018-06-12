@@ -1,7 +1,5 @@
 package shukaro.nodalmechanics.recipe;
 
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,104 +11,110 @@ import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.InfusionRecipe;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class RecipeNode extends InfusionRecipe
+public class RecipeNode
+    extends InfusionRecipe
 {
-    public static final int VISMULTIPLIER = 10;
-    public static final int INSTABILITY = 10;
-    public static Random rand;
-
+    private static final int ESSENTIA_MULTIPLIER = 4;
+    private static final int INSTABILITY = 10;
+    private final Random random;
     public RecipeNode()
     {
-        super("NODECATALYZATION", ItemApi.getItem("itemJarNode", 0), INSTABILITY, new AspectList(), new ItemStack(NodalItems.itemMatrix), new ItemStack[]{ItemApi.getItem("itemResource", 14), ItemApi.getItem("itemResource", 14)});
-        rand = new Random();
+        super("NODECATALYZATION", ItemApi.getItem("itemJarNode", 0), INSTABILITY, new AspectList(),
+              new ItemStack(NodalItems.itemMatrix),
+              new ItemStack[] {ItemApi.getItem("itemResource", 14), ItemApi.getItem("itemResource", 14),
+                               ItemApi.getItem("itemResource", 14), ItemApi.getItem("itemResource", 14)});
+        random = new Random();
     }
-
     @Override
     public boolean matches(ArrayList<ItemStack> input, ItemStack central, World world, EntityPlayer player)
     {
         if (!ThaumcraftApiHelper.isResearchComplete(player.getCommandSenderName(), getResearch()))
+        {
             return false;
-        if (input == null || input.size() != 2)
+        }
+        ItemStack[] components = getComponents();
+        if (input == null || input.size() != components.length)
+        {
             return false;
-        if (!checkItemEquals(input.get(0), getComponents()[0]) || !checkItemEquals(input.get(1), getComponents()[1]))
-            return false;
-        ((ItemStack)this.recipeOutput).setTagCompound(new NBTTagCompound());
+        }
+        for (int i = 0; i < components.length; i++)
+        {
+            if (!OreDictionary.itemMatches(components[i], input.get(i), true))
+            {
+                return false;
+            }
+        }
         if (central != null && central.getItem().equals(NodalItems.itemMatrix))
         {
-            if (central.hasTagCompound() && central.getTagCompound().hasKey("aspects"))
+            if (central.hasTagCompound())
             {
-                TMap<String, Integer> aspectMap = new THashMap<String, Integer>();
-                for (String s : central.getTagCompound().getString("aspects").split(","))
+                AspectList nodeAspectList = new AspectList();
+                nodeAspectList.readFromNBT(central.getTagCompound());
+                if (nodeAspectList.size() == 0)
                 {
-                    if (!aspectMap.containsKey(s))
-                        aspectMap.put(s, 1);
-                    else
-                        aspectMap.put(s, aspectMap.get(s) + 1);
+                    return false;
                 }
-                this.aspects = new AspectList();
-                AspectList smallAspects = new AspectList();
-                for (String s : aspectMap.keySet())
+                AspectList recipeAspectList = new AspectList();
+                for (Aspect aspect : nodeAspectList.getAspects())
                 {
-                    this.aspects.add(Aspect.getAspect(s), aspectMap.get(s) * 15 * VISMULTIPLIER);
-                    smallAspects.add(Aspect.getAspect(s), aspectMap.get(s) * 15);
+                    recipeAspectList.add(aspect, nodeAspectList.getAmount(aspect) * ESSENTIA_MULTIPLIER);
                 }
-                smallAspects.writeToNBT(((ItemStack)this.recipeOutput).getTagCompound());
-                ((ItemStack)this.recipeOutput).getTagCompound().setInteger("nodetype", getNodeType());
-                if (rand.nextInt(100) < 60)
-                    ((ItemStack)this.recipeOutput).getTagCompound().setInteger("nodemod", getNodeMod());
+                this.aspects = recipeAspectList;
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                nodeAspectList.writeToNBT(tagCompound);
+                tagCompound.setInteger("nodetype", getNodeType());
+                if (random.nextInt(100) < 75)
+                {
+                    tagCompound.setInteger("nodemod", getNodeModifier());
+                }
+                ((ItemStack) this.recipeOutput).setTagCompound(tagCompound);
                 return true;
             }
         }
         return false;
     }
-
     private int getNodeType()
     {
-        int roll = rand.nextInt(100);
-        if (roll < 80)
-            return 0;
-        else if (roll < 90)
+        int chance = random.nextInt(100);
+        if (chance < 75)
         {
-            if (roll < 85)
-                return 1;
-            else if (roll < 90)
-                return 4;
+            return NodeType.NORMAL.ordinal();
         }
-        else
+        if (chance < 80)
         {
-            if (roll < 93)
-                return 2;
-            else if (roll < 96)
-                return 3;
-            else
-                return 5;
+            return NodeType.UNSTABLE.ordinal();
         }
-        return 0;
+        if (chance < 85)
+        {
+            return NodeType.DARK.ordinal();
+        }
+        if (chance < 90)
+        {
+            return NodeType.TAINTED.ordinal();
+        }
+        if (chance < 95)
+        {
+            return NodeType.HUNGRY.ordinal();
+        }
+        return NodeType.PURE.ordinal();
     }
-
-    private int getNodeMod()
+    private int getNodeModifier()
     {
-        int roll = rand.nextInt(50);
-        if (roll < 20)
-            return 0;
-        else if (roll < 40)
-            return 1;
-        else
-            return 2;
-    }
-
-    private boolean checkItemEquals(ItemStack target, ItemStack input)
-    {
-        if (input == null && target != null || input != null && target == null)
+        int chance = random.nextInt(100);
+        if (chance < 75)
         {
-            return false;
+            return NodeModifier.FADING.ordinal();
         }
-        return (target.getItem() == input.getItem() &&
-                (!target.hasTagCompound() || ItemStack.areItemStackTagsEqual(target, input)) &&
-                (target.getItemDamage() == OreDictionary.WILDCARD_VALUE|| target.getItemDamage() == input.getItemDamage()));
+        if (chance < 90)
+        {
+            return NodeModifier.PALE.ordinal();
+        }
+        return NodeModifier.BRIGHT.ordinal();
     }
 }
