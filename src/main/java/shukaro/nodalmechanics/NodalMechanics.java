@@ -7,23 +7,27 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.StatCollector;
+
 import org.apache.logging.log4j.Logger;
-import shukaro.nodalmechanics.gui.NodalTab;
+
 import shukaro.nodalmechanics.items.NodalItems;
 import shukaro.nodalmechanics.net.CommonProxy;
 import shukaro.nodalmechanics.recipe.NodalRecipes;
 import shukaro.nodalmechanics.research.NodalResearch;
 
-@Mod(modid = NodalMechanics.modID, name = NodalMechanics.modName, version = NodalMechanics.modVersion,
-        dependencies = "required-after:Thaumcraft")
+@Mod(
+		modid = NodalMechanics.modID, 
+		name = "Nodal Mechanics", 
+		version = "${version}",
+        dependencies = "required-after:Thaumcraft@[4.2.3.5,);"
+    )
+
 public class NodalMechanics
 {
     @SidedProxy(clientSide = "shukaro.nodalmechanics.net.ClientProxy", serverSide = "shukaro.nodalmechanics.net.CommonProxy")
     public static CommonProxy proxy;
 
     public static final String modID = "NodalMechanics";
-    public static final String modName = "NodalMechanics";
-    public static final String modVersion = "1.7.10R1.0";
 
     public static Logger logger;
 

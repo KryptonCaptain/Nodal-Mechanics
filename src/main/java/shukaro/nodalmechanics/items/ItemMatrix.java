@@ -1,9 +1,7 @@
 package shukaro.nodalmechanics.items;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
+import java.util.List;
+
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,14 +12,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+
 import org.apache.commons.lang3.text.WordUtils;
+
 import shukaro.nodalmechanics.NodalMechanics;
-import shukaro.nodalmechanics.util.FormatCodes;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-
-import java.util.List;
-import java.util.Locale;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemMatrix
     extends Item
@@ -56,7 +54,7 @@ public class ItemMatrix
         for (Aspect aspect : Aspect.getPrimalAspects())
         {
             ItemStack itemStack = new ItemStack(item, 1, 0);
-            AspectList aspectList = new AspectList().add(aspect, 8);
+            AspectList aspectList = new AspectList().add(aspect, 100);
             NBTTagCompound tagCompound = new NBTTagCompound();
             aspectList.writeToNBT(tagCompound);
             itemStack.setTagCompound(tagCompound);
@@ -73,7 +71,7 @@ public class ItemMatrix
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister)
     {
-        this.icon = iconRegister.registerIcon(NodalMechanics.modID.toLowerCase(Locale.ENGLISH) + ":" + "itemMatrix");
+        this.icon = iconRegister.registerIcon(NodalMechanics.modID + ":" + "itemMatrix");
     }
     @Override
     @SideOnly(Side.CLIENT)
@@ -100,18 +98,18 @@ public class ItemMatrix
             for (Aspect aspect : aspectList.getAspects())
             {
                 list.add("\u00A7" + (aspect.getChatcolor() != null ? aspect.getChatcolor() : "7") +
-                         WordUtils.capitalize(aspect.getName()) + FormatCodes.Reset.code + FormatCodes.White.code +
+                         WordUtils.capitalize(aspect.getName()) + EnumChatFormatting.RESET + EnumChatFormatting.WHITE +
                          " x " + aspectList.getAmount(aspect));
             }
-            list.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code +
+            list.add(EnumChatFormatting.DARK_GRAY +""+ EnumChatFormatting.ITALIC +
                      StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.attuned"));
         }
         else
         {
-            list.add(FormatCodes.DarkGrey.code + FormatCodes.Italic.code +
+            list.add(EnumChatFormatting.DARK_GRAY +""+ EnumChatFormatting.ITALIC +
                      StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.unattuned"));
         }
-        list.add(FormatCodes.Grey.code + FormatCodes.Italic.code +
+        list.add(EnumChatFormatting.GRAY +
                  StatCollector.translateToLocal("tooltip.nodalmechanics.matrix.recipe"));
     }
 }

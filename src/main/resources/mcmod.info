@@ -7,16 +7,10 @@
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authors": [
-    "Shukaro"
-  ],
+  "authors": ["Shukaro"],
   "credits": "All the contributors",
   "logoFile": "",
-  "screenshots": [
-  ],
-  "parent": "",
-  "dependencies": [
-    "MinecraftForge","Thaumcraft"
-  ]
+  "screenshots": [],
+  "dependencies": ["MinecraftForge","Thaumcraft"]
 }
 ]

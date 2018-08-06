@@ -1,4 +1,4 @@
-package shukaro.nodalmechanics.gui;
+package shukaro.nodalmechanics;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;

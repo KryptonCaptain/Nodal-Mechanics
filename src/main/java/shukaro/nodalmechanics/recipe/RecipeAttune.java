@@ -12,12 +12,25 @@ import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.IArcaneRecipe;
+import thaumcraft.common.config.ConfigItems;
 
-public class RecipeAttune
-    implements IArcaneRecipe
-{
-    private static final int ESSENTIA_MULTIPLIER = 4;
+public class RecipeAttune implements IArcaneRecipe {
+	
+	/**
+	How many points a phial of essentia adds to the matrix
+	 */
+    public static final int ESSENTIA_MULTIPLIER = 1; 
+    
+    /**
+    Cost to attune a matrix in the arcane workbench
+     */
+    public static final AspectList CRAFTING_COST = new AspectList()
+
+            .add(Aspect.ORDER, 10);
+
+    
     private ItemStack output;
+    
     @Override
     public boolean matches(IInventory inventory, World world, EntityPlayer player)
     {
@@ -27,7 +40,7 @@ public class RecipeAttune
         }
         ItemStack matrix = null;
         ItemStack targetMatrix = new ItemStack(NodalItems.itemMatrix);
-        ItemStack phial = ItemApi.getItem("itemEssence", 1);
+        ItemStack phial = new ItemStack(ConfigItems.itemEssence,1,1);
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 3; j++)
@@ -75,7 +88,7 @@ public class RecipeAttune
                     }
                     for (Aspect aspect : phialAspectList.getAspects())
                     {
-                        aspectList.add(aspect, phialAspectList.getAmount(aspect) / ESSENTIA_MULTIPLIER);
+                        aspectList.add(aspect, ESSENTIA_MULTIPLIER); 
                     }
                     continue;
                 }
@@ -113,12 +126,8 @@ public class RecipeAttune
     @Override
     public AspectList getAspects()
     {
-        return new AspectList().add(Aspect.AIR, 1)
-                               .add(Aspect.WATER, 1)
-                               .add(Aspect.FIRE, 1)
-                               .add(Aspect.ORDER, 1)
-                               .add(Aspect.ENTROPY, 1)
-                               .add(Aspect.EARTH, 1);
+    	
+    	return CRAFTING_COST;
     }
     @Override
     public AspectList getAspects(IInventory inventory)
